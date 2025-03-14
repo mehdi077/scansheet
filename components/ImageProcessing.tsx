@@ -135,7 +135,7 @@ export default function ImageProcessing() {
             className="px-6 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
           >
             <X size={16} />
-            Supprimer l'image
+            {"Supprimer l'image"}
           </button>
 
           {storageId && (

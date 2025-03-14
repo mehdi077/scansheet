@@ -121,13 +121,13 @@ export async function processImage(imageUrl: string) {
             try {
                 const result = await processImagePart(imageParts[i], i, imageParts.length);
                 results.push(result);
-            } catch (error) {
+            } catch {
                 console.error(`\n❌ Failed to process part ${i + 1}. Retrying in 5 seconds...`);
                 await delay(5000); // Wait 5 seconds before retry
                 try {
                     const result = await processImagePart(imageParts[i], i, imageParts.length);
                     results.push(result);
-                } catch (retryError) {
+                } catch {
                     console.error(`\n❌ Retry failed for part ${i + 1}. Skipping this part.`);
                 }
             }

@@ -7,7 +7,7 @@ export async function toXcel(ocrResult: string) {
     const sections = ocrResult.split(/```\s*\n/);
     
     // Process each section and combine the data
-    const allData: any[][] = [];
+    const allData: string[][] = [];
     
     for (const section of sections) {
         if (!section.trim()) continue;

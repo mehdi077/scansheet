@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import AuthWrapper from '@/components/AuthWrapper';
 import ImageProcessing from '@/components/ImageProcessing';
-import PdfProcessing from '@/components/PdfProcessing';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'image' | 'pdf'>('image');
@@ -48,7 +47,7 @@ export default function Home() {
 
           {/* Content */}
           <div className="bg-white rounded-xl shadow-sm p-8">
-            {activeTab === 'image' ? <ImageProcessing /> : <PdfProcessing />}
+            {activeTab === 'image' ? <ImageProcessing /> : <span>PDF</span>}
           </div>
         </div>
       </main>

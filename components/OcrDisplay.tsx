@@ -81,7 +81,7 @@ const OcrDisplay = ({ ocrResult }: { ocrResult: string }) => {
   return (
     <div className="mt-8 space-y-4">
       <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-medium text-gray-900">Résultat de l'extraction</h2>
+        <h2 className="text-lg font-medium text-gray-900">{"Résultat de l'extraction"}</h2>
         <button
           onClick={downloadExcel}
           disabled={isDownloading}
