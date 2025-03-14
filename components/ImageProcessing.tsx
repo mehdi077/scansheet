@@ -150,10 +150,14 @@ export default function ImageProcessing() {
                   if (!getStorageUrl) throw new Error("URL de l'image non trouvée");
                   
                   const result = await processImage(getStorageUrl);
+                  if (!result) {
+                    throw new Error("Aucun résultat n'a été retourné par le traitement OCR");
+                  }
                   console.log("Résultat OCR:", result);
                   setOcrResult(result as string);
                 } catch (error) {
                   console.error("Erreur lors du traitement OCR:", error);
+                  alert(error instanceof Error ? error.message : "Une erreur est survenue lors du traitement de l'image. Veuillez réessayer avec une image plus petite ou de meilleure qualité.");
                 } finally {
                   setIsProcessing(false); 
                 }

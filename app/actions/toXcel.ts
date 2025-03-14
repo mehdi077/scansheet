@@ -15,7 +15,7 @@ export async function toXcel(ocrResult: string) {
         // Split the section into rows
         const rows = section.split('\n')
             .filter(row => row.trim())  // Remove empty rows
-            .map(row => row.split(',').map(cell => cell.trim()));  // Split by comma and trim cells
+            .map(row => row.split('|').map(cell => cell.trim()));  // Split by | and trim cells
             
         // Add a blank row between sections if there's already data
         if (allData.length > 0 && rows.length > 0) {
