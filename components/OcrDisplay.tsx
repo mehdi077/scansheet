@@ -2,100 +2,175 @@
 
 import { toXcel } from '@/app/actions/toXcel';
 import { Download } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useUser } from '@clerk/nextjs';
+import * as XLSX from 'xlsx';
+import { Id } from "@/convex/_generated/dataModel";
 
-// Type declaration for IE/Edge specific features
-interface INavigator extends Navigator {
-  msSaveOrOpenBlob?: (blob: Blob, defaultName?: string) => boolean;
-}
 
-const OcrDisplay = ({ ocrResult }: { ocrResult: string }) => {
-  const [isDownloading, setIsDownloading] = useState(false);
+const OcrDisplay = ({ 
+  ocrResult, 
+  initialFileDocumentId 
+}: { 
+  ocrResult: string, 
+  initialFileDocumentId?: Id<"file"> 
+}) => {
+  const { user } = useUser();
+  const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
+  const uploadXcel = useMutation(api.file.updateFileWithXcel);
 
-  const downloadExcel = async () => {
-    if (!ocrResult) {
-      alert('Aucun résultat à télécharger');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [excelFile, setExcelFile] = useState<{ blob: Blob; filename: string; data: string[][] } | null>(null);
+
+  useEffect(() => {
+    const processOcrResult = async () => {
+      if (!ocrResult || !user) return;
+
+      setIsProcessing(true);
+      try {
+        console.log('Starting Excel generation with OCR result length:', ocrResult.length);
+        const excelBuffer = await toXcel(ocrResult);
+        console.log('Received Excel buffer:', excelBuffer);
+        
+        if (!excelBuffer) {
+          throw new Error('Aucune donnée reçue du serveur');
+        }
+
+        // Create a Blob directly from the buffer
+        const blob = new Blob([excelBuffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+        console.log('Created blob, size:', blob.size);
+
+        // Read the Excel file to get the data
+        const workbook = XLSX.read(excelBuffer, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const excelData: string[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Extract filename from first line of OCR result
+        const firstLine = ocrResult.split('\n')[0].trim();
+        const sanitizedName = firstLine
+          .toLowerCase()
+          .replace(/[^a-z0-9]/g, '-') // Replace special chars with hyphens
+          .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+        
+        const date = new Date().toISOString().split('T')[0];
+        const filename = sanitizedName ? `${sanitizedName}-${date}.xlsx` : `document-${date}.xlsx`;
+        
+        let storageId: Id<"_storage"> | undefined;
+
+        // Only upload if no initial storage ID was provided
+        if (!storageId) {
+          // Upload Excel file to Convex storage
+          const uploadUrl = await generateUploadUrl();
+          const uploadResult = await fetch(uploadUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            },
+            body: blob,
+          });
+          const uploadResponse = await uploadResult.json();
+          storageId = uploadResponse.storageId;
+        }
+
+        // Save Excel file metadata if storage ID and document ID exist
+        if (storageId && initialFileDocumentId) {
+          await uploadXcel({
+            fileDocumentId: initialFileDocumentId,
+            xcelStorageId: storageId,
+            fileName: filename,
+          });
+        }
+
+        // Store the blob, filename, and parsed data
+        setExcelFile({ blob, filename, data: excelData });
+      } catch (error: unknown) {
+        console.error("Erreur détaillée lors de la génération du fichier Excel:", error);
+        const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+        alert(`Une erreur est survenue lors du traitement: ${errorMessage}. Veuillez réessayer.`);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    if (ocrResult) {
+      processOcrResult();
+    }
+  }, [ocrResult, user, generateUploadUrl, uploadXcel, initialFileDocumentId]);
+
+  const downloadExcel = () => {
+    if (!excelFile) {
+      alert('Aucun fichier Excel disponible');
       return;
     }
 
-    setIsDownloading(true);
     try {
-      console.log('Starting Excel generation with OCR result length:', ocrResult.length);
-      const excelBuffer = await toXcel(ocrResult);
-      console.log('Received Excel buffer:', excelBuffer);
+      const { blob, filename } = excelFile;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.style.display = 'none';
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
       
-      if (!excelBuffer) {
-        throw new Error('Aucune donnée reçue du serveur');
-      }
-
-      // Create a Blob directly from the buffer
-      const blob = new Blob([excelBuffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      });
-      console.log('Created blob, size:', blob.size);
-
-      // Get current date for filename
-      const date = new Date().toISOString().split('T')[0];
-      const filename = `bon-de-livraison-${date}.xlsx`;
-      
-      try {
-        // Try the download attribute approach first
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.style.display = 'none';
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        
-        // Cleanup after a short delay
-        setTimeout(() => {
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-          console.log('Download cleanup completed');
-        }, 1000); // Increased timeout to ensure download starts
-      } catch (downloadError) {
-        console.error('Error with primary download method, trying fallback:', downloadError);
-        
-        // Fallback method using navigator.msSaveBlob for IE/Edge or direct blob URL
-        const nav = window.navigator as INavigator;
-        if (nav.msSaveOrOpenBlob) {
-          nav.msSaveOrOpenBlob(blob, filename);
-        } else {
-          // Final fallback - open in new tab
-          const blobUrl = window.URL.createObjectURL(blob);
-          window.open(blobUrl, '_blank');
-          setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
-        }
-      }
-
-    } catch (error: unknown) {
-      console.error("Erreur détaillée lors de la génération du fichier Excel:", error);
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      alert(`Une erreur est survenue lors du téléchargement: ${errorMessage}. Veuillez réessayer.`);
-    } finally {
-      setIsDownloading(false);
+      // Cleanup after a short delay
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        console.log('Download cleanup completed');
+      }, 1000);
+    } catch (downloadError) {
+      console.error('Erreur lors du téléchargement:', downloadError);
+      alert('Une erreur est survenue lors du téléchargement');
     }
   };
 
   return (
     <div className="mt-8 space-y-4">
       <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-medium text-gray-900">{"Résultat de l'extraction"}</h2>
+        <h2 className="text-lg font-medium text-neutral-900">{"Résultat de l'extraction"}</h2>
         <button
           onClick={downloadExcel}
-          disabled={isDownloading}
-          className={`inline-flex items-center px-4 py-2 ${
-            isDownloading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-600'
-          } text-white rounded-lg transition-colors duration-200`}
+          disabled={!excelFile || isProcessing}
+          className={`inline-flex items-center px-6 py-2.5 text-sm font-medium rounded-lg transition-colors duration-200 ${
+            !excelFile || isProcessing 
+            ? 'bg-neutral-100 text-neutral-400 cursor-not-allowed' 
+            : 'bg-neutral-900 hover:bg-neutral-800 text-white'
+          }`}
         >
           <Download className="h-4 w-4 mr-2" />
-          {isDownloading ? 'Téléchargement...' : 'Télécharger Excel'}
+          {isProcessing ? 'Traitement...' : excelFile ? 'Télécharger Excel' : 'En attente'}
         </button>
       </div>
-      <div className="bg-white p-4 rounded-lg shadow">
-        <div className="whitespace-pre-wrap">{ocrResult}</div>
-      </div>
+      
+      {excelFile && (
+        <div className="bg-white p-4 rounded-lg shadow-sm overflow-x-auto">
+          <table className="w-full text-sm text-left text-gray-500">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+              <tr>
+                {excelFile.data[0]?.map((header, index) => (
+                  <th key={index} className="px-4 py-2 border">{header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {excelFile.data.slice(1).map((row, rowIndex) => (
+                <tr key={rowIndex} className="bg-white border-b hover:bg-gray-50">
+                  {row.map((cell, cellIndex) => (
+                    <td key={cellIndex} className="px-4 py-2 border">{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

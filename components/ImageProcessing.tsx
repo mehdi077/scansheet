@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Loader2, FileText } from 'lucide-react';
 import { useUser } from '@clerk/nextjs'
-import { useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery, useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { processImage } from '@/app/actions/convert';
 import { Id } from "@/convex/_generated/dataModel";
@@ -10,6 +10,7 @@ import OcrDisplay from '@/components/OcrDisplay';
 
 export default function ImageProcessing() {
   const { user } = useUser();
+  const convex = useConvex();
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const saveFile = useMutation(api.file.uploadFile);
 
@@ -20,6 +21,7 @@ export default function ImageProcessing() {
   const [storageId, setStorageId] = useState<Id<"_storage"> | null>(null);
   const [ocrResult, setOcrResult] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [fileDocumentId, setFileDocumentId] = useState<Id<"file"> | null>(null);
 
   const getStorageUrl = useQuery(api.storage.getUrl, storageId ? { storageId } : "skip");
 
@@ -28,6 +30,7 @@ export default function ImageProcessing() {
     setPreview(null);
     setOcrResult(null);
     setStorageId(null);
+    setFileDocumentId(null);
   }, []);
 
   // Dropzone configuration
@@ -36,42 +39,8 @@ export default function ImageProcessing() {
     setFile(selectedFile);
     setPreview(URL.createObjectURL(selectedFile));
     
-    if (!selectedFile || !user) return;
-    
-    try {
-      setIsUploading(true);
-      
-      // 1. Get the upload URL
-      const uploadUrl = await generateUploadUrl();
-      
-      // 2. Upload the file to Convex storage
-      const result = await fetch(uploadUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": selectedFile.type,
-        },
-        body: selectedFile,
-      });
-      const { storageId } = await result.json();
-      
-      // 3. Save the file metadata
-      await saveFile({
-        userId: user.id,
-        file: storageId,
-        fileName: selectedFile.name,
-        fileType: selectedFile.type,
-      });
-
-      setStorageId(storageId);
-      
-    } catch (error) {
-      console.error("Erreur lors du téléchargement:", error);
-      // If upload fails, reset the form
-      handleReset();
-    } finally {
-      setIsUploading(false);
-    }
-  }, [user, generateUploadUrl, saveFile, handleReset]);
+    // L'upload est maintenant déplacé vers le bouton "Extraire le texte"
+  }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -105,6 +74,12 @@ export default function ImageProcessing() {
               {isUploading && (
                 <div className="absolute inset-0 bg-white/80 rounded-lg flex items-center justify-center">
                   <Loader2 size={24} className="animate-spin text-neutral-900" />
+                </div>
+              )}
+              {isProcessing && (
+                <div className="absolute inset-0 rounded-lg overflow-hidden">
+                  <div className="absolute inset-0 bg-black/10" />
+                  <div className="absolute inset-x-0 h-[2px] bg-blue-500/50 animate-scan-line" />
                 </div>
               )}
             </div>
@@ -178,13 +153,88 @@ export default function ImageProcessing() {
               )}
             </button>
           )}
+
+          {file && !storageId && (
+            <button
+              onClick={async (e) => {
+                e.stopPropagation();
+                if (!file || !user) return;
+                
+                try {
+                  setIsUploading(true);
+                  setIsProcessing(true);
+                  
+                  // 1. Get the upload URL
+                  const uploadUrl = await generateUploadUrl();
+                  
+                  // 2. Upload the file to Convex storage
+                  const result = await fetch(uploadUrl, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": file.type,
+                    },
+                    body: file,
+                  });
+                  const { storageId: newStorageId } = await result.json();
+                  
+                  // 3. Save the file metadata and get the document ID
+                  const documentId = await saveFile({
+                    userId: user.id,
+                    file: newStorageId,
+                    fileName: file.name,
+                    fileType: file.type,
+                  });
+
+                  setStorageId(newStorageId);
+                  setFileDocumentId(documentId);
+                  
+                  // 4. Once upload is complete, process the image with OCR
+                  const storageUrl = await convex.query(api.storage.getUrl, { storageId: newStorageId });
+                  if (!storageUrl) throw new Error("URL de l'image non trouvée");
+                  
+                  const ocrResult = await processImage(storageUrl);
+                  if (!ocrResult) {
+                    throw new Error("Aucun résultat n'a été retourné par le traitement OCR");
+                  }
+                  
+                  console.log("Résultat OCR:", ocrResult);
+                  setOcrResult(ocrResult as string);
+                  
+                } catch (error) {
+                  console.error("Erreur lors du traitement:", error);
+                  alert(error instanceof Error ? error.message : "Une erreur est survenue lors du traitement de l'image. Veuillez réessayer avec une image plus petite ou de meilleure qualité.");
+                  handleReset();
+                } finally {
+                  setIsUploading(false);
+                  setIsProcessing(false);
+                }
+              }}
+              disabled={isUploading || isProcessing}
+              className={`px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm font-medium ${(isUploading || isProcessing) ? 'opacity-75 cursor-wait' : ''}`}
+            >
+              {isUploading || isProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Traitement en cours...</span>
+                </>
+              ) : (
+                <>
+                  <FileText size={16} />
+                  <span>Extraire le texte</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       )}
 
       {/* OCR Results */}
       {ocrResult && (
         <div className="mt-8">
-          <OcrDisplay ocrResult={ocrResult} />
+          <OcrDisplay 
+            ocrResult={ocrResult} 
+            initialFileDocumentId={fileDocumentId || undefined} 
+          />
         </div>
       )}
     </div>

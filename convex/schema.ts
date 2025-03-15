@@ -15,6 +15,7 @@ export default defineSchema({
     file: v.id("_storage"),
     fileName: v.string(),
     fileType: v.string(),
+    xcel: v.optional(v.id("_storage")),
   }).index("by_user_id", ["userId"]),
 
 });

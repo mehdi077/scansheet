@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import AuthWrapper from '@/components/AuthWrapper';
 import ImageProcessing from '@/components/ImageProcessing';
+import History from '@/components/History';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'image' | 'pdf'>('image');
@@ -13,8 +14,8 @@ export default function Home() {
         <div className="max-w-4xl mx-auto px-4 py-12">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-3xl font-light text-neutral-800 mb-2">Extraction de Texte</h1>
-            <p className="text-neutral-500">Sélectionnez le type de document à traiter</p>
+            <h1 className="text-3xl font-light text-neutral-800 mb-2">Convertisseur d'Images en Excel</h1>
+            <p className="text-neutral-500">Transformez vos images en fichiers Excel téléchargeables en quelques clics</p>
           </div>
 
           {/* Tab switcher */}
@@ -48,6 +49,9 @@ export default function Home() {
           {/* Content */}
           <div className="bg-white rounded-xl shadow-sm p-8">
             {activeTab === 'image' ? <ImageProcessing /> : <span>PDF</span>}
+          </div>
+          <div className="bg-white rounded-xl shadow-sm p-8">
+            <History />
           </div>
         </div>
       </main>
