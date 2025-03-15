@@ -1,13 +1,13 @@
 
-- [ ] style the OcrDisplay
+- [x] style the OcrDisplay
 - [x] convert into a downloadable xcel file for the table
 - [ ] implement the credit score
 - [ ] make any new account have free 10 credits
-- [ ] implement owner files including the previous xcel files generated
-- [ ] improve the sign in page
-- [ ] improve the download button
+- [x] implement owner files including the previous xcel files generated
+- [x] improve the sign in page
+- [x] improve the download button
 - [ ] build the pricing page
-- [ ] improve the displaying of the table in the UI
+- [x] improve the displaying of the table in the UI
 - [ ] remove generate table button after generating the table
-- [ ] make the onbording in the sign in page at the very start
+- [x] make the onbording in the sign in page at the very start
 - [ ] 

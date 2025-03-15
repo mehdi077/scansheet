@@ -14,8 +14,8 @@ export default function Home() {
         <div className="max-w-4xl mx-auto px-4 py-12">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-3xl font-light text-neutral-800 mb-2">Convertisseur d'Images en Excel</h1>
-            <p className="text-neutral-500">Transformez vos images en fichiers Excel téléchargeables en quelques clics</p>
+            <h1 className="text-3xl font-light text-neutral-800 mb-2">{"Convertisseur d'Images en Excel"}</h1>
+            <p className="text-neutral-500">{"Transformez vos images en fichiers Excel téléchargeables en quelques clics"}</p>
           </div>
 
           {/* Tab switcher */}

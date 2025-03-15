@@ -87,8 +87,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
                   <Clock className="w-6 h-6 text-neutral-900" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-neutral-900 mb-2">Gain de temps considérable</h3>
-                  <p className="text-neutral-600">Fini la saisie manuelle fastidieuse. Automatisez l'extraction de vos données en quelques clics.</p>
+                  <h3 className="text-lg font-medium text-neutral-900 mb-2">{"Gain de temps considérable"}</h3>
+                  <p className="text-neutral-600">{"Fini la saisie manuelle fastidieuse. Automatisez l'extraction de vos données en quelques clics."}</p>
                 </div>
               </div>
               {/* Benefit 2 */}

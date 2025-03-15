@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api";
 import { processImage } from '@/app/actions/convert';
 import { Id } from "@/convex/_generated/dataModel";
 import OcrDisplay from '@/components/OcrDisplay';
+import Image from 'next/image';
 
 export default function ImageProcessing() {
   const { user } = useUser();
@@ -66,9 +67,11 @@ export default function ImageProcessing() {
         {preview ? (
           <div className="flex flex-col items-center gap-6">
             <div className="relative">
-              <img
+              <Image
                 src={preview}
                 alt={`Aperçu de ${file?.name}`}
+                width={160}
+                height={160}
                 className="w-40 h-40 object-cover rounded-lg shadow-sm"
               />
               {isUploading && (
