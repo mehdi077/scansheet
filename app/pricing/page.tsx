@@ -1,5 +1,5 @@
 import React from 'react'
-import { Check, Zap, CreditCard, RefreshCcw, ChevronRight, Shield, Clock, MessageCircle } from 'lucide-react'
+import { Check, Zap, CreditCard, RefreshCcw, ChevronRight, Shield, MessageCircle } from 'lucide-react'
 
 const createWhatsAppUrl = (message: string) => {
   const phoneNumber = "213792107513"
@@ -198,19 +198,19 @@ function Pricing() {
         </div>
         <div className="space-y-8">
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-medium text-neutral-900 mb-3">Qu'est-ce qu'un crédit ?</h3>
+            <h3 className="text-lg font-medium text-neutral-900 mb-3">{"Qu'est-ce qu'un crédit ?"}</h3>
             <p className="text-neutral-600">Un crédit correspond à une image ou une page PDF traitée, quelle que soit sa taille ou sa complexité. Pour chaque image ou page que vous téléchargez et traitez, un crédit est déduit de votre compte.</p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-medium text-neutral-900 mb-3">Quelle est la durée de validité de mes crédits ?</h3>
+            <h3 className="text-lg font-medium text-neutral-900 mb-3">{"Quelle est la durée de validité de mes crédits ?"}</h3>
             <p className="text-neutral-600">La validité de vos crédits dépend du forfait choisi : 3 mois pour le forfait Débutant, 6 mois pour le forfait Standard et 12 mois pour le forfait Professionnel.</p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-medium text-neutral-900 mb-3">Puis-je changer de forfait à tout moment ?</h3>
+            <h3 className="text-lg font-medium text-neutral-900 mb-3">{"Puis-je changer de forfait à tout moment ?"}</h3>
             <p className="text-neutral-600">Oui, vous pouvez passer à un forfait supérieur à tout moment. Les crédits restants de votre forfait actuel seront automatiquement transférés vers votre nouveau forfait.</p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-medium text-neutral-900 mb-3">Comment fonctionne le support client ?</h3>
+            <h3 className="text-lg font-medium text-neutral-900 mb-3">{"Comment fonctionne le support client ?"}</h3>
             <p className="text-neutral-600">Tous nos forfaits incluent un support par email. Les forfaits Standard et Professionnel bénéficient d'un support prioritaire, et le forfait Professionnel offre en plus un accès au support 24/7.</p>
           </div>
         </div>

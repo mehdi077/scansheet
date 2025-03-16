@@ -110,7 +110,7 @@ export default function ImageProcessing() {
             <Upload className="mx-auto h-16 w-16 text-neutral-400" />
             <p className="mt-4 text-sm text-neutral-600">
               {isDragActive
-                ? 'Déposez l\'image ici...'
+                ? "Déposez l'image ici..."
                 : 'Glissez & déposez une image ici, ou cliquez pour sélectionner'}
             </p>
             <p className="mt-2 text-xs text-neutral-500">

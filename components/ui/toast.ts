@@ -1,5 +1,4 @@
 import { toast } from "sonner";
-import { ReactNode } from "react";
 
 export const toastService = {
   success: (message: string, description?: string) => {
@@ -44,10 +43,6 @@ export const toastService = {
       loading: string;
       success: string;
       error: string;
-    },
-    options?: {
-      successDescription?: string;
-      errorDescription?: string;
     }
   ) => {
     return toast.promise(promise, {
