@@ -5,6 +5,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
 import Header from "@/components/Header";
 import SyncUserWithConvex from "@/components/SyncUserWithConvex";
+import { ToastProvider } from "@/components/ui/toast-provider";
+
 const ibmPlexSansDevanagari = IBM_Plex_Sans_Devanagari({
   variable: "--font-ibm-plex-sans-devanagari",
   subsets: ["devanagari", "latin"],
@@ -28,6 +30,7 @@ export default function RootLayout({
       >
         <ConvexClientProvider>
           <ClerkProvider>
+            <ToastProvider />
             <Header />
             <SyncUserWithConvex />
             {children}

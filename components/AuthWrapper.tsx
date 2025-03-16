@@ -25,10 +25,10 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
             <div className="text-center">
               <h1 className="text-4xl font-light tracking-tight text-neutral-900 sm:text-5xl md:text-6xl mb-8">
-                Transformez vos <span className="font-normal">images</span> en <span className="font-normal">données</span>
+                {"Extraction de texte à partir d'images et de PDF"}
               </h1>
               <p className="max-w-2xl mx-auto text-xl text-neutral-600 mb-8">
-                Extrayez automatiquement le texte de vos images et convertissez-le en fichiers Excel exploitables en quelques secondes.
+                {"Convertissez instantanément le texte de vos images et documents PDF en fichiers Excel exploitables et téléchargeables."}
               </p>
               <SignInButton mode="modal">
                 <button className="inline-flex items-center px-8 py-3 bg-neutral-900 hover:bg-neutral-800 text-white text-lg font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl">
@@ -51,24 +51,24 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
                 <div className="w-16 h-16 bg-neutral-100 rounded-2xl flex items-center justify-center mb-6">
                   <Image className="w-8 h-8 text-neutral-900" />
                 </div>
-                <h3 className="text-xl font-medium text-neutral-900 mb-3">Importez vos images</h3>
-                <p className="text-neutral-600">Téléchargez vos images contenant du texte par simple glisser-déposer</p>
+                <h3 className="text-xl font-medium text-neutral-900 mb-3">{"Importez vos images ou PDF"}</h3>
+                <p className="text-neutral-600">{"Téléchargez vos images ou documents PDF contenant du texte par simple glisser-déposer"}</p>
               </div>
               {/* Feature 2 */}
               <div className="flex flex-col items-center text-center p-6">
                 <div className="w-16 h-16 bg-neutral-100 rounded-2xl flex items-center justify-center mb-6">
                   <Zap className="w-8 h-8 text-neutral-900" />
                 </div>
-                <h3 className="text-xl font-medium text-neutral-900 mb-3">Extraction automatique</h3>
-                <p className="text-neutral-600">Notre technologie OCR extrait automatiquement tout le texte de vos images</p>
+                <h3 className="text-xl font-medium text-neutral-900 mb-3">{"Extraction automatique"}</h3>
+                <p className="text-neutral-600">{"Notre technologie OCR extrait automatiquement tout le texte de vos images et PDF"}</p>
               </div>
               {/* Feature 3 */}
               <div className="flex flex-col items-center text-center p-6">
                 <div className="w-16 h-16 bg-neutral-100 rounded-2xl flex items-center justify-center mb-6">
                   <FileSpreadsheet className="w-8 h-8 text-neutral-900" />
                 </div>
-                <h3 className="text-xl font-medium text-neutral-900 mb-3">Fichiers Excel</h3>
-                <p className="text-neutral-600">Téléchargez instantanément vos données au format Excel</p>
+                <h3 className="text-xl font-medium text-neutral-900 mb-3">{"Fichiers Excel"}</h3>
+                <p className="text-neutral-600">{"Téléchargez instantanément vos données issues d'images ou de PDF au format Excel"}</p>
               </div>
             </div>
           </div>
@@ -88,7 +88,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
                 </div>
                 <div>
                   <h3 className="text-lg font-medium text-neutral-900 mb-2">{"Gain de temps considérable"}</h3>
-                  <p className="text-neutral-600">{"Fini la saisie manuelle fastidieuse. Automatisez l'extraction de vos données en quelques clics."}</p>
+                  <p className="text-neutral-600">{"Fini la saisie manuelle fastidieuse. Automatisez l'extraction de vos données depuis images et PDF en quelques clics."}</p>
                 </div>
               </div>
               {/* Benefit 2 */}
@@ -107,8 +107,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
                   <BarChart className="w-6 h-6 text-neutral-900" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-neutral-900 mb-2">Précision optimale</h3>
-                  <p className="text-neutral-600">Notre technologie de reconnaissance optique assure une extraction précise de vos données.</p>
+                  <h3 className="text-lg font-medium text-neutral-900 mb-2">{"Précision optimale"}</h3>
+                  <p className="text-neutral-600">{"Notre technologie de reconnaissance optique assure une extraction précise de vos données à partir d'images et de PDF."}</p>
                 </div>
               </div>
               {/* CTA */}

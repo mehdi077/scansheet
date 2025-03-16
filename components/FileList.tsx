@@ -1,19 +1,20 @@
-import { useUser } from '@clerk/nextjs';
-import { useQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
 import { useStorageUrl } from '@/lib/utils';
 import { Download, FileSpreadsheet } from 'lucide-react';
 import { Id } from "@/convex/_generated/dataModel";
 import Image from 'next/image';
 
-// Separate component for each file row
-const FileRow = ({ file }: { file: { 
-  _id: Id<"file">, 
-  file: Id<"_storage">, 
-  fileName: string,
-  _creationTime: number,
-  xcel?: Id<"_storage"> 
-}}) => {
+interface FileProps {
+  _id: Id<"file">;
+  userId: string;
+  file: Id<"_storage">;
+  fileName: string;
+  fileType: string;
+  _creationTime: number;
+  xcel?: Id<"_storage">;
+}
+
+// File row component similar to the one in History.tsx
+const FileRow = ({ file }: { file: FileProps }) => {
   const imageUrl = useStorageUrl(file.file);
   const excelUrl = useStorageUrl(file.xcel);
 
@@ -102,12 +103,14 @@ const FileRow = ({ file }: { file: {
   );
 };
 
-// Main History component
-function History({ limit = 5 }: { limit?: number }) {
-  const { user } = useUser();
-  const files = useQuery(api.file.filesByUserId, user?.id ? { userId: user.id, limit: 6 } : "skip");
+// Main FileList component 
+interface FileListProps {
+  files: FileProps[];
+  isLoading: boolean;
+}
 
-  if (!files) {
+const FileList = ({ files, isLoading }: FileListProps) => {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64 px-4">
         <p className="text-neutral-500 text-center">Chargement de votre historique...</p>
@@ -115,7 +118,7 @@ function History({ limit = 5 }: { limit?: number }) {
     );
   }
 
-  if (files.length === 0) {
+  if (!files || files.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 bg-white rounded-xl shadow-sm mx-4">
         <p className="text-neutral-500 text-center">Aucun fichier trouvé</p>
@@ -123,46 +126,13 @@ function History({ limit = 5 }: { limit?: number }) {
     );
   }
 
-  const displayedFiles = files.slice(0, limit + 1);
-  const hasMore = files.length > limit;
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-      {/* Header section */}
-      <div className="space-y-2 mb-6 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-light tracking-tight text-neutral-900">
-          Historique de vos documents
-        </h2>
-        <p className="text-base sm:text-lg text-neutral-600">
-          Retrouvez ici tous vos documents analysés et leurs fichiers Excel associés
-        </p>
-      </div>
-
-      {/* File list */}
-      <div className="bg-neutral-50 rounded-xl sm:rounded-2xl p-3 sm:p-6 relative">
-        <div className="space-y-3">
-          {displayedFiles.map((file, index) => (
-            <div key={file._id} className={index === limit ? "relative" : ""}>
-              <FileRow file={file} />
-              {index === limit && hasMore && (
-                <>
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-neutral-50/80 to-neutral-50 pointer-events-none" />
-                  <div className="absolute -bottom-16 sm:-bottom-20 inset-x-0 flex justify-center items-center">
-                    <a
-                      href="/history"
-                      className="inline-flex items-center px-6 sm:px-8 py-2.5 sm:py-3 bg-neutral-900 hover:bg-neutral-800 text-white text-sm sm:text-base font-medium rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl"
-                    >
-                      {"Voir l'historique complet"}
-                    </a>
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+    <div className="space-y-3">
+      {files.map((file) => (
+        <FileRow key={file._id} file={file} />
+      ))}
     </div>
   );
-}
+};
 
-export default History;
+export default FileList; 

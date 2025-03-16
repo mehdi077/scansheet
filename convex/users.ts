@@ -1,8 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
-
-
 export const updateUser = mutation({
     args: {
       userId: v.string(),
@@ -17,12 +15,17 @@ export const updateUser = mutation({
         .first();
   
       if (existingUser) {
-        // Update existing user
+        // Update existing user while preserving credits
         await ctx.db.patch(existingUser._id, {
           name,
           email,
+          // If credits don't exist, initialize them to 10
+          credits: existingUser.credits ?? 10,
         });
-        return existingUser._id;
+        return {
+            id: existingUser._id,
+            new: false
+        }
       }
   
       // Create new user
@@ -30,9 +33,13 @@ export const updateUser = mutation({
         userId,
         name,
         email,
+        credits: 10,
       });
   
-      return newUserId;
+      return {
+        id: newUserId,
+        new: true
+      };
     },
   });
 

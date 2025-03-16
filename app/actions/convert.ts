@@ -6,9 +6,6 @@ const apiKey = process.env.MISTRAL_API_KEY;
 const client = new Mistral({apiKey: apiKey});
 
 export async function processImage(imageUrl: string) {
-
-    
-
     const chatResponse = await client.chat.complete({
         model: "pixtral-large-2411",
         messages: [

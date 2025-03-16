@@ -11,11 +11,11 @@ export default function Home() {
   return (
     <AuthWrapper>
       <main className="min-h-screen bg-neutral-50">
-        <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto px-2 py-12">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-3xl font-light text-neutral-800 mb-2">{"Convertisseur d'Images en Excel"}</h1>
-            <p className="text-neutral-500">{"Transformez vos images en fichiers Excel téléchargeables en quelques clics"}</p>
+            <h1 className="text-3xl font-light text-neutral-800 mb-2">{"Convertisseur d'Images et de PDF en Excel"}</h1>
+            <p className="text-neutral-500">{"Transformez vos images et documents PDF en fichiers Excel téléchargeables en quelques clics"}</p>
           </div>
 
           {/* Tab switcher */}
@@ -47,10 +47,10 @@ export default function Home() {
           </div>
 
           {/* Content */}
-          <div className="bg-white rounded-xl shadow-sm p-8">
+          <div className="bg-white rounded-xl shadow-sm py-8 px-4">
             {activeTab === 'image' ? <ImageProcessing /> : <span>PDF</span>}
           </div>
-          <div className="bg-white rounded-xl shadow-sm p-8">
+          <div className="bg-white rounded-xl shadow-sm py-8 px-4 mt-8">
             <History />
           </div>
         </div>

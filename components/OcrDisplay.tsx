@@ -2,33 +2,46 @@
 
 import { toXcel } from '@/app/actions/toXcel';
 import { Download } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from '@clerk/nextjs';
 import * as XLSX from 'xlsx';
 import { Id } from "@/convex/_generated/dataModel";
+import { toast } from "@/components/ui";
 
 
 const OcrDisplay = ({ 
   ocrResult, 
-  initialFileDocumentId 
+  initialFileDocumentId,
+  fileName
 }: { 
   ocrResult: string, 
-  initialFileDocumentId?: Id<"file"> 
+  initialFileDocumentId?: Id<"file">,
+  fileName?: string
 }) => {
   const { user } = useUser();
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const uploadXcel = useMutation(api.file.updateFileWithXcel);
+  const processingRef = useRef<string | null>(null);
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [excelFile, setExcelFile] = useState<{ blob: Blob; filename: string; data: string[][] } | null>(null);
 
+  // Reset excel file when ocrResult changes
+  useEffect(() => {
+    setExcelFile(null);
+  }, [ocrResult]);
+
   useEffect(() => {
     const processOcrResult = async () => {
-      if (!ocrResult || !user) return;
-
+      // Check if we're already processing this OCR result
+      if (!ocrResult || !user || processingRef.current === ocrResult) return;
+      
+      // Mark this OCR result as being processed
+      processingRef.current = ocrResult;
       setIsProcessing(true);
+
       try {
         console.log('Starting Excel generation with OCR result length:', ocrResult.length);
         const excelBuffer = await toXcel(ocrResult);
@@ -52,14 +65,15 @@ const OcrDisplay = ({
 
         // Extract filename from first line of OCR result
         const firstLine = ocrResult.split('\n')[0].trim();
-        const sanitizedName = firstLine
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, '-') // Replace special chars with hyphens
-          .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-          .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+        const baseFileName = fileName ? 
+          fileName.replace(/\.[^/.]+$/, '') : // Remove file extension if present
+          firstLine
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
         
-        const date = new Date().toISOString().split('T')[0];
-        const filename = sanitizedName ? `${sanitizedName}-${date}.xlsx` : `document-${date}.xlsx`;
+        const filename = baseFileName ? `${baseFileName}.xlsx` : `document.xlsx`;
         
         let storageId: Id<"_storage"> | undefined;
 
@@ -89,10 +103,15 @@ const OcrDisplay = ({
 
         // Store the blob, filename, and parsed data
         setExcelFile({ blob, filename, data: excelData });
+        
+        // Show success toast when Excel is ready
+        toast.succes("Extraction terminée", "L'extraction vers Excel est terminée. Le fichier est prêt à être téléchargé");
       } catch (error: unknown) {
         console.error("Erreur détaillée lors de la génération du fichier Excel:", error);
         const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
         alert(`Une erreur est survenue lors du traitement: ${errorMessage}. Veuillez réessayer.`);
+        // Reset processing ref on error so user can try again
+        processingRef.current = null;
       } finally {
         setIsProcessing(false);
       }
@@ -101,7 +120,7 @@ const OcrDisplay = ({
     if (ocrResult) {
       processOcrResult();
     }
-  }, [ocrResult, user, generateUploadUrl, uploadXcel, initialFileDocumentId]);
+  }, [ocrResult, user, initialFileDocumentId]); // Remove mutation dependencies
 
   const downloadExcel = () => {
     if (!excelFile) {

@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, Loader2, FileText } from 'lucide-react';
+import { Upload, X, Loader2, FileText, RefreshCw } from 'lucide-react';
 import { useUser } from '@clerk/nextjs'
 import { useMutation, useQuery, useConvex } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -8,12 +8,16 @@ import { processImage } from '@/app/actions/convert';
 import { Id } from "@/convex/_generated/dataModel";
 import OcrDisplay from '@/components/OcrDisplay';
 import Image from 'next/image';
+import { toast } from "@/components/ui";
 
 export default function ImageProcessing() {
   const { user } = useUser();
   const convex = useConvex();
   const generateUploadUrl = useMutation(api.storage.generateUploadUrl);
   const saveFile = useMutation(api.file.uploadFile);
+  const userData = useQuery(api.users.getUserById, 
+    user?.id ? { userId: user.id } : "skip"
+  );
 
   // State to store the uploaded file
   const [file, setFile] = useState<File | null>(null);
@@ -32,15 +36,24 @@ export default function ImageProcessing() {
     setOcrResult(null);
     setStorageId(null);
     setFileDocumentId(null);
+    toast.info("Réinitialisation", "Image supprimée avec succès");
   }, []);
 
   // Dropzone configuration
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const selectedFile = acceptedFiles[0];
+    
+    // Check file size (10MB = 10 * 1024 * 1024 bytes)
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      toast.avertissement(
+        "Fichier trop volumineux",
+        "La taille du fichier doit être inférieure à 10 Mo"
+      );
+      return;
+    }
+    
     setFile(selectedFile);
     setPreview(URL.createObjectURL(selectedFile));
-    
-    // L'upload est maintenant déplacé vers le bouton "Extraire le texte"
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -82,21 +95,26 @@ export default function ImageProcessing() {
               {isProcessing && (
                 <div className="absolute inset-0 rounded-lg overflow-hidden">
                   <div className="absolute inset-0 bg-black/10" />
-                  <div className="absolute inset-x-0 h-[2px] bg-blue-500/50 animate-scan-line" />
+                  <div className="absolute inset-0 w-full h-[2px] bg-blue-500/50 animate-scan-line" />
                 </div>
               )}
             </div>
             <p className="text-sm text-neutral-600">
-              {isUploading ? 'Téléchargement en cours...' : `Fichier sélectionné: ${file?.name}`}
+              {isUploading ? "Téléchargement en cours..." : 
+               isProcessing ? "Génération Excel en cours..." :
+               `${file?.name}`}
             </p>
           </div>
         ) : (
-          <>
+          <>  
             <Upload className="mx-auto h-16 w-16 text-neutral-400" />
             <p className="mt-4 text-sm text-neutral-600">
               {isDragActive
                 ? 'Déposez l\'image ici...'
                 : 'Glissez & déposez une image ici, ou cliquez pour sélectionner'}
+            </p>
+            <p className="mt-2 text-xs text-neutral-500">
+              La taille de l'image ne doit pas dépasser <span className="font-bold">10 MB</span>
             </p>
           </>
         )}
@@ -105,67 +123,42 @@ export default function ImageProcessing() {
       {/* Action buttons */}
       {preview && !isUploading && (
         <div className="flex flex-col items-center gap-4">
+          <p className="text-sm text-neutral-900">
+            {storageId ? (
+              <>La <span className="font-bold">régénération</span> coûtera <span className="text-red-600 font-bold">1 crédit</span> de plus</>
+            ) : (
+              <>Cette opération consommera <span className="text-red-600 font-bold">1 crédit</span></>
+            )}
+          </p>
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleReset();
             }}
-            className="px-6 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm font-medium"
+            disabled={isUploading || isProcessing}
+            className={`px-6 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm font-medium ${
+              (isUploading || isProcessing) ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
             <X size={16} />
             {"Supprimer l'image"}
           </button>
 
-          {storageId && (
-            <button
-              onClick={async (e) => {
-                e.stopPropagation();
-                if (!storageId) return;
-                setOcrResult(null);
-                
-                try {
-                  setIsProcessing(true);
-                  if (!getStorageUrl) throw new Error("URL de l'image non trouvée");
-                  
-                  const result = await processImage(getStorageUrl);
-                  if (!result) {
-                    throw new Error("Aucun résultat n'a été retourné par le traitement OCR");
-                  }
-                  console.log("Résultat OCR:", result);
-                  setOcrResult(result as string);
-                } catch (error) {
-                  console.error("Erreur lors du traitement OCR:", error);
-                  alert(error instanceof Error ? error.message : "Une erreur est survenue lors du traitement de l'image. Veuillez réessayer avec une image plus petite ou de meilleure qualité.");
-                } finally {
-                  setIsProcessing(false); 
-                }
-              }}
-              disabled={isProcessing}
-              className={`px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm font-medium ${isProcessing ? 'opacity-75 cursor-wait' : ''}`}
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Traitement en cours...</span>
-                </>
-              ) : (
-                <>
-                  <FileText size={16} />
-                  <span>Extraire le texte</span>
-                </>
-              )}
-            </button>
-          )}
+          <button
+            onClick={async (e) => {
+              e.stopPropagation();
+              if (!user || (!file && !storageId)) return;
+              if (userData?.credits === 0) {
+                toast.avertissement("Crédits épuisés", "Vous n'avez plus de crédits. Veuillez acheter des crédits pour continuer.");
+                return;
+              }
 
-          {file && !storageId && (
-            <button
-              onClick={async (e) => {
-                e.stopPropagation();
-                if (!file || !user) return;
+              try {
+                setIsProcessing(true);
                 
-                try {
+                // If no storageId exists, we need to upload the file first
+                if (!storageId && file) {
                   setIsUploading(true);
-                  setIsProcessing(true);
                   
                   // 1. Get the upload URL
                   const uploadUrl = await generateUploadUrl();
@@ -191,52 +184,73 @@ export default function ImageProcessing() {
                   setStorageId(newStorageId);
                   setFileDocumentId(documentId);
                   
-                  // 4. Once upload is complete, process the image with OCR
+                  // Get the storage URL for the newly uploaded file
                   const storageUrl = await convex.query(api.storage.getUrl, { storageId: newStorageId });
                   if (!storageUrl) throw new Error("URL de l'image non trouvée");
                   
+                  // Process the image
                   const ocrResult = await processImage(storageUrl);
                   if (!ocrResult) {
                     throw new Error("Aucun résultat n'a été retourné par le traitement OCR");
                   }
                   
-                  console.log("Résultat OCR:", ocrResult);
                   setOcrResult(ocrResult as string);
+                  toast.succes("Traitement terminé", "Le texte a été extrait avec succès");
+                } else {
+                  // If storageId exists, just regenerate OCR
+                  setOcrResult(null);
+                  if (!getStorageUrl) throw new Error("URL de l'image non trouvée");
                   
-                } catch (error) {
-                  console.error("Erreur lors du traitement:", error);
-                  alert(error instanceof Error ? error.message : "Une erreur est survenue lors du traitement de l'image. Veuillez réessayer avec une image plus petite ou de meilleure qualité.");
-                  handleReset();
-                } finally {
-                  setIsUploading(false);
-                  setIsProcessing(false);
+                  const result = await processImage(getStorageUrl);
+                  if (!result) {
+                    throw new Error("Aucun résultat n'a été retourné par le traitement OCR");
+                  }
+                  setOcrResult(result as string);
+                  toast.succes("Extraction réussie", "Le texte a été extrait avec succès");
                 }
-              }}
-              disabled={isUploading || isProcessing}
-              className={`px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm font-medium ${(isUploading || isProcessing) ? 'opacity-75 cursor-wait' : ''}`}
-            >
-              {isUploading || isProcessing ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Traitement en cours...</span>
-                </>
-              ) : (
-                <>
-                  <FileText size={16} />
-                  <span>Extraire le texte</span>
-                </>
-              )}
-            </button>
-          )}
+              } catch (error) {
+                console.error("Erreur lors du traitement:", error);
+                toast.erreur("Erreur de traitement", "Une erreur est survenue lors du traitement de l'image. Veuillez réessayer avec une image de meilleure qualité.");
+                if (!storageId) handleReset();
+              } finally {
+                setIsUploading(false);
+                setIsProcessing(false);
+              }
+            }}
+            disabled={isUploading || isProcessing}
+            className={`px-6 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm font-medium ${(isUploading || isProcessing) ? 'opacity-75 cursor-wait' : ''}`}
+          >
+            {isUploading || isProcessing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>Traitement en cours...</span>
+              </>
+            ) : (
+              <>
+                {storageId ? (
+                  <>
+                    <RefreshCw size={16} />
+                    <span>Régénérer</span>
+                  </>
+                ) : (
+                  <>
+                    <FileText size={16} />
+                    <span>Extraire le texte</span>
+                  </>
+                )}
+              </>
+            )}
+          </button>
         </div>
       )}
 
       {/* OCR Results */}
       {ocrResult && (
-        <div className="mt-8">
+        <div className="mt-8 ">
           <OcrDisplay 
             ocrResult={ocrResult} 
-            initialFileDocumentId={fileDocumentId || undefined} 
+            initialFileDocumentId={fileDocumentId || undefined}
+            fileName={file?.name}
           />
         </div>
       )}
