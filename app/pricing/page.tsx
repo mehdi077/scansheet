@@ -50,7 +50,7 @@ function Pricing() {
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <Check className="w-5 h-5 text-neutral-900 flex-shrink-0 mr-3" />
-                  <span className="text-neutral-600 text-sm">300 crédits d'extraction</span>
+                  <span className="text-neutral-600 text-sm">{"300 crédits d'extraction"}</span>
                 </li>
                 <li className="flex items-start">
                   <Check className="w-5 h-5 text-neutral-900 flex-shrink-0 mr-3" />
@@ -90,7 +90,7 @@ function Pricing() {
               <ul className="space-y-3">
                 <li className="flex items-start">
                   <Check className="w-5 h-5 text-neutral-900 flex-shrink-0 mr-3" />
-                  <span className="text-neutral-600 text-sm">1000 crédits d'extraction</span>
+                  <span className="text-neutral-600 text-sm">{"1000 crédits d'extraction"}</span>
                 </li>
                 <li className="flex items-start">
                   <Check className="w-5 h-5 text-neutral-900 flex-shrink-0 mr-3" />
@@ -183,7 +183,7 @@ function Pricing() {
               <RefreshCcw className="w-6 h-6 text-neutral-900" />
             </div>
             <h3 className="text-lg font-medium text-neutral-900 mb-3">Mises à jour régulières</h3>
-            <p className="text-neutral-600">Notre technologie s'améliore constamment pour vous</p>
+            <p className="text-neutral-600">{"Notre technologie s'améliore constamment pour vous"}</p>
           </div>
         </div>
       </div>
@@ -210,8 +210,8 @@ function Pricing() {
             <p className="text-neutral-600">Oui, vous pouvez passer à un forfait supérieur à tout moment. Les crédits restants de votre forfait actuel seront automatiquement transférés vers votre nouveau forfait.</p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-medium text-neutral-900 mb-3">Comment fonctionne le support client ?</h3>
-            <p className="text-neutral-600">Tous nos forfaits incluent un support par email. Les forfaits Standard et Professionnel bénéficient d'un support prioritaire, et le forfait Professionnel offre en plus un accès au support 24/7.</p>
+            <h3 className="text-lg font-medium text-neutral-900 mb-3">{"Comment fonctionne le support client ?"}</h3>
+            <p className="text-neutral-600">{"Tous nos forfaits incluent un support par email. Les forfaits Standard et Professionnel bénéficient d'un support prioritaire, et le forfait Professionnel offre en plus un accès au support 24/7."}</p>
           </div>
         </div>
       </div>
@@ -221,7 +221,7 @@ function Pricing() {
         <div className="bg-neutral-900 rounded-2xl overflow-hidden shadow-xl">
           <div className="px-8 py-16 sm:p-16">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl font-light text-white mb-6">Besoin d'un forfait personnalisé ?</h2>
+              <h2 className="text-3xl font-light text-white mb-6">{"Besoin d'un forfait personnalisé ?"}</h2>
               <p className="text-xl text-neutral-300 mb-8">
                 {"Contactez notre équipe commerciale pour créer un forfait adapté à vos besoins spécifiques"}
               </p>
