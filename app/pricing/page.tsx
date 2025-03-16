@@ -198,11 +198,11 @@ function Pricing() {
         </div>
         <div className="space-y-8">
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-medium text-neutral-900 mb-3">Qu&apos;est-ce qu&apos;un crédit ?</h3>
-            <p className="text-neutral-600">Un crédit correspond à une image ou une page PDF traitée, quelle que soit sa taille ou sa complexité. Pour chaque image ou page que vous téléchargez et traitez, un crédit est déduit de votre compte.</p>
+            <h3 className="text-lg font-medium text-neutral-900 mb-3">{"Qu'est-ce qu'un crédit ?"}</h3>
+            <p className="text-neutral-600">{"Un crédit correspond à une image ou une page PDF traitée, quelle que soit sa taille ou sa complexité. Pour chaque image ou page que vous téléchargez et traitez, un crédit est déduit de votre compte."}</p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
-            <h3 className="text-lg font-medium text-neutral-900 mb-3">Quelle est la durée de validité de mes crédits ?</h3>
+            <h3 className="text-lg font-medium text-neutral-900 mb-3">{"Quelle est la durée de validité de mes crédits ?"}</h3>
             <p className="text-neutral-600">La validité de vos crédits dépend du forfait choisi : 3 mois pour le forfait Débutant, 6 mois pour le forfait Standard et 12 mois pour le forfait Professionnel.</p>
           </div>
           <div className="bg-white p-6 rounded-xl shadow-sm">
@@ -223,10 +223,10 @@ function Pricing() {
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-light text-white mb-6">Besoin d'un forfait personnalisé ?</h2>
               <p className="text-xl text-neutral-300 mb-8">
-                Contactez notre équipe commerciale pour créer un forfait adapté à vos besoins spécifiques
+                {"Contactez notre équipe commerciale pour créer un forfait adapté à vos besoins spécifiques"}
               </p>
               <a 
-                href={createWhatsAppUrl("Bonjour, j&apos;aimerais en savoir plus sur vos forfaits personnalisés.")}
+                href={createWhatsAppUrl("Bonjour, j'aimerais en savoir plus sur vos forfaits personnalisés.")}
                 target="_blank"
                 rel="noopener noreferrer" 
                 className="inline-flex items-center px-8 py-3 bg-white hover:bg-neutral-100 text-neutral-900 text-lg font-medium rounded-lg transition-colors duration-200 shadow-lg">

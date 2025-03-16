@@ -114,7 +114,7 @@ export default function ImageProcessing() {
                 : "Glissez & déposez une image ici, ou cliquez pour sélectionner"}
             </p>
             <p className="mt-2 text-xs text-neutral-500">
-              La taille de l'image ne doit pas dépasser <span className="font-bold">10 MB</span>
+              {"La taille de l'image ne doit pas dépasser"} <span className="font-bold">10 MB</span>
             </p>
           </>
         )}
